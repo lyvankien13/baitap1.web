@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- https://go.microsoft.com/fwlink/?LinkID=208121. -->
+<Project>
+  <PropertyGroup>
+    <_PublishTargetUrl>D:\BI-A\publish</_PublishTargetUrl>
+    <History>True|2025-09-28T08:15:35.6034843Z||;True|2025-09-28T15:08:09.9176734+07:00||;True|2025-09-28T14:23:59.0237957+07:00||;</History>
+    <LastFailureDetails />
+  </PropertyGroup>
+  <ItemGroup>
+    <File Include="api.aspx">
+      <publishTime>09/28/2025 14:17:21</publishTime>
+    </File>
+    <File Include="bin/WebApplication1.dll">
+      <publishTime>09/28/2025 15:15:35</publishTime>
+    </File>
+    <File Include="bin/WebApplication1.pdb">
+      <publishTime>09/28/2025 15:15:35</publishTime>
+    </File>
+    <File Include="index.html">
+      <publishTime>09/28/2025 14:22:32</publishTime>
+    </File>
+    <File Include="Web.config">
+      <publishTime>09/28/2025 14:23:58</publishTime>
+    </File>
+  </ItemGroup>
+</Project>

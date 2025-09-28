@@ -1,0 +1,808 @@
+﻿<!doctype html>
+<html lang="vi">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>6-Pocket Pool — Single file (Enhanced UI)</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <style>
+        :root {
+            --bg-top: #071122;
+            --bg-bot: #041026;
+            --felt: #0b6b3a;
+            --rail-dark: #3a2b1f;
+            --rail-light: #caa76b;
+            --accent: #ffd166;
+            --muted: #9fb0c2;
+            font-family: Inter, system-ui, "Segoe UI", Roboto, Arial, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            background: linear-gradient(180deg, var(--bg-top), var(--bg-bot));
+            color: #eaf3ff
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 18px auto;
+            padding: 18px;
+            display: flex;
+            gap: 18px;
+            align-items: flex-start
+        }
+
+        .canvas-wrap {
+            flex: 1;
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 18px 60px rgba(2, 8, 20, 0.7)
+        }
+
+        #table {
+            display: block;
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.12));
+            width: 100%;
+            height: auto
+        }
+
+        .ui {
+            width: 340px
+        }
+
+        .panel {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.04)
+        }
+
+        h1 {
+            margin: 0 0 6px;
+            color: var(--accent);
+            font-size: 20px
+        }
+
+        .lead {
+            color: var(--muted);
+            font-size: 13px;
+            margin: 0 0 12px
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px
+        }
+
+        .row {
+            display: flex;
+            gap: 10px;
+            align-items: center
+        }
+
+        .btn {
+            background: linear-gradient(180deg, var(--accent), #ffb84d);
+            border: 0;
+            padding: 10px 12px;
+            border-radius: 10px;
+            color: #042018;
+            font-weight: 700;
+            cursor: pointer
+        }
+
+            .btn.secondary {
+                background: transparent;
+                border: 1px solid rgba(255, 255, 255, 0.06);
+                color: var(--muted)
+            }
+
+        label {
+            font-size: 13px;
+            color: var(--muted)
+        }
+
+        .small {
+            font-size: 13px;
+            color: var(--muted)
+        }
+
+        .stats {
+            margin-top: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px
+        }
+
+        .balls-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px
+        }
+
+        .ball-chip {
+            width: 28px;
+            height: 20px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+            color: #041018
+        }
+
+        .footer {
+            color: var(--muted);
+            font-size: 12px;
+            margin-top: 8px
+        }
+
+        @media (max-width:980px) {
+            .container {
+                flex-direction: column
+            }
+
+            .ui {
+                width: 100%
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="canvas-wrap">
+            <canvas id="table" width="1200" height="720"></canvas>
+            <div style="position:absolute;left:18px;top:18px;color:var(--muted);font-size:13px">Click+drag cue ball to aim, release to shoot — Space to rack</div>
+        </div>
+
+        <div class="ui">
+            <div class="panel">
+                <h1>6-Pocket Pool</h1>
+                <div class="lead">Bàn 6 lỗ, cue, bi trắng + 1–15. Giao diện nâng cao, hiệu ứng lăn & lỗ rõ rệt.</div>
+
+                <div class="controls">
+                    <div class="row">
+                        <button id="btnNew" class="btn">New Game (Rack)</button>
+                        <button id="btnReset" class="btn secondary">Stop / Reset</button>
+                    </div>
+
+                    <div class="row">
+                        <label style="width:120px">Friction</label>
+                        <input id="friction" type="range" min="0" max="0.02" step="0.001" value="0.008" style="flex:1">
+                    </div>
+
+                    <div class="row">
+                        <label style="width:120px">Power</label>
+                        <input id="power" type="range" min="0.2" max="2.0" step="0.05" value="1.0" style="flex:1">
+                    </div>
+
+                    <div class="row">
+                        <label style="width:120px">Show trajectory</label>
+                        <input id="traj" type="checkbox" checked>
+                        <div style="margin-left:auto;color:var(--muted);font-size:13px">Traj preview</div>
+                    </div>
+
+                    <div class="stats">
+                        <div class="small">Pocketed:</div>
+                        <div id="pocketed" class="balls-list"></div>
+                        <div class="small">Remaining:</div>
+                        <div id="remaining" class="balls-list"></div>
+                    </div>
+                </div>
+
+                <div class="footer">Space: rack • R: reset cue position • Click+drag: shoot</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (() => {
+            const canvas = document.getElementById('table');
+            const ctx = canvas.getContext('2d');
+            let W = canvas.width,
+                H = canvas.height;
+
+            // Table geometry (relative to canvas)
+            const table = {
+                x: 80,
+                y: 80,
+                w: W - 160,
+                h: H - 160,
+                rail: 36,
+                pocketRadius: 36
+            };
+            const POCKET_R = table.pocketRadius;
+
+            // Ball
+            const BALL_R = 14;
+            const BALL_DIAM = BALL_R * 2;
+            const RESTITUTION = 0.985;
+            let friction = Number(document.getElementById('friction').value);
+            let powerMult = Number(document.getElementById('power').value);
+            let showTraj = document.getElementById('traj').checked;
+
+            const ballDefs = [null,
+                '#f7b500', '#1e90ff', '#ff3b30', '#ff8a00', '#00b383', '#7a00ff', '#ff4ec0', '#000000',
+                '#f7b500', '#1e90ff', '#ff3b30', '#ff8a00', '#00b383', '#7a00ff', '#ff4ec0'
+            ];
+
+            let balls = []; // {id,num,x,y,vx,vy,r,color,pocketed,angle,angVel,sink}
+            let pocketed = [];
+            let history = JSON.parse(localStorage.getItem('pool_hist') || '[]');
+
+            // helper
+            const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+            const hyp = (x, y) => Math.hypot(x, y);
+
+            function pockets() {
+                return [{
+                    x: table.x,
+                    y: table.y
+                }, {
+                    x: table.x + table.w / 2,
+                    y: table.y
+                }, {
+                    x: table.x + table.w,
+                    y: table.y
+                }, {
+                    x: table.x,
+                    y: table.y + table.h
+                }, {
+                    x: table.x + table.w / 2,
+                    y: table.y + table.h
+                }, {
+                    x: table.x + table.w,
+                    y: table.y + table.h
+                }];
+            }
+
+            // initialize rack
+            function rack() {
+                balls = [];
+                pocketed = [];
+                // cue ball
+                const cueX = table.x + table.w * 0.22;
+                const cueY = table.y + table.h / 2;
+                balls.push({
+                    id: 0,
+                    num: null,
+                    x: cueX,
+                    y: cueY,
+                    vx: 0,
+                    vy: 0,
+                    r: BALL_R,
+                    color: '#ffffff',
+                    pocketed: false,
+                    angle: 0,
+                    angVel: 0,
+                    sink: 0
+                });
+
+                // triangle rack
+                const startX = table.x + table.w * 0.7;
+                const startY = table.y + table.h / 2;
+                let id = 1;
+                const gap = BALL_DIAM + 2;
+                for (let row = 0; row < 5; row++) {
+                    const offsetX = row * (gap * Math.cos(Math.PI / 6));
+                    const rowY = startY - (row * gap) / 2;
+                    for (let col = 0; col <= row; col++) {
+                        if (id > 15) break;
+                        const x = startX + offsetX;
+                        const y = rowY + col * gap;
+                        balls.push({
+                            id: id,
+                            num: id,
+                            x: x,
+                            y: y,
+                            vx: 0,
+                            vy: 0,
+                            r: BALL_R,
+                            color: ballDefs[id] || '#999',
+                            pocketed: false,
+                            angle: Math.random() * Math.PI * 2,
+                            angVel: 0,
+                            sink: 0
+                        });
+                        id++;
+                    }
+                }
+                updateUI();
+            }
+
+            // draw table background with wooden rails and felt, pockets with rim highlight
+            function drawTable() {
+                // background vignette
+                ctx.save();
+                const gradBG = ctx.createLinearGradient(0, 0, 0, H);
+                gradBG.addColorStop(0, 'rgba(4,11,26,0.9)');
+                gradBG.addColorStop(1, 'rgba(2,6,18,0.95)');
+                ctx.fillStyle = gradBG;
+                ctx.fillRect(0, 0, W, H);
+
+                // outer shadow frame
+                ctx.fillStyle = '#0b1b20';
+                ctx.fillRect(table.x - 60, table.y - 60, table.w + 120, table.h + 120);
+
+                // rail wood
+                const railGrad = ctx.createLinearGradient(table.x - table.rail, table.y, table.x + table.w + table.rail, table.y + table.h);
+                railGrad.addColorStop(0, '#4b2b19');
+                railGrad.addColorStop(0.5, '#2f2116');
+                railGrad.addColorStop(1, '#4b2b19');
+                ctx.fillStyle = railGrad;
+                // top rail
+                ctx.fillRect(table.x - table.rail, table.y - table.rail, table.w + table.rail * 2, table.rail);
+                // bottom
+                ctx.fillRect(table.x - table.rail, table.y + table.h, table.w + table.rail * 2, table.rail);
+                // left
+                ctx.fillRect(table.x - table.rail, table.y - table.rail, table.rail, table.h + table.rail * 2);
+                // right
+                ctx.fillRect(table.x + table.w, table.y - table.rail, table.rail, table.h + table.rail * 2);
+
+                // felt
+                const feltGrad = ctx.createLinearGradient(table.x, table.y, table.x + table.w, table.y + table.h);
+                feltGrad.addColorStop(0, '#0f7a4e');
+                feltGrad.addColorStop(1, '#0b6b3a');
+                ctx.fillStyle = feltGrad;
+                ctx.fillRect(table.x, table.y, table.w, table.h);
+
+                // pocket rims (metal)
+                const p = pockets();
+                p.forEach((pk, idx) => {
+                    // outer rim
+                    const rimR = POCKET_R + 6;
+                    const rimGrad = ctx.createRadialGradient(pk.x, pk.y, rimR * 0.2, pk.x, pk.y, rimR);
+                    rimGrad.addColorStop(0, 'rgba(255,255,255,0.25)');
+                    rimGrad.addColorStop(0.3, 'rgba(200,180,150,0.35)');
+                    rimGrad.addColorStop(1, 'rgba(30,25,20,0.9)');
+                    ctx.beginPath();
+                    ctx.fillStyle = rimGrad;
+                    ctx.arc(pk.x, pk.y, rimR, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // inner pocket (black hole)
+                    ctx.beginPath();
+                    ctx.fillStyle = '#020203';
+                    ctx.arc(pk.x, pk.y, POCKET_R - 2, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // subtle highlight at top of rim
+                    ctx.beginPath();
+                    ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+                    ctx.lineWidth = 2;
+                    ctx.arc(pk.x, pk.y, rimR - 2, Math.PI * 1.1, Math.PI * 1.9);
+                    ctx.stroke();
+                });
+
+                // inner felt border line
+                ctx.strokeStyle = 'rgba(0,0,0,0.35)';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(table.x + 1, table.y + 1, table.w - 2, table.h - 2);
+
+                ctx.restore();
+            }
+
+            // draw each ball with rolling highlight and stripe (for stripes) rotated by angle
+            function drawBalls() {
+                for (const b of balls) {
+                    // if pocketed animate sink scale
+                    const scale = b.pocketed ? (1 - Math.min(1, b.sink)) : 1;
+                    const alpha = b.pocketed ? Math.max(0.2, 1 - b.sink) : 1;
+                    ctx.save();
+                    ctx.globalAlpha = alpha;
+
+                    // rolling elongated shadow depending on speed
+                    const speed = hyp(b.vx, b.vy);
+                    const shadowScale = clamp(speed / 6, 0, 1.6);
+                    ctx.beginPath();
+                    const shX = b.x + (b.vx ? -b.vx * 2 : 0);
+                    const shY = b.y + (b.vy ? -b.vy * 2 : 8);
+                    ctx.ellipse(shX, shY, b.r * (1 + shadowScale * 0.6), b.r * 0.55, 0, 0, Math.PI * 2);
+                    ctx.fillStyle = 'rgba(0,0,0,0.42)';
+                    ctx.fill();
+
+                    // ball group
+                    ctx.translate(b.x, b.y);
+                    if (b.angle) ctx.rotate(b.angle);
+                    ctx.scale(scale, scale);
+
+                    // ball body
+                    ctx.beginPath();
+                    ctx.fillStyle = b.color;
+                    ctx.arc(0, 0, b.r, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // stripes for num>=9
+                    if (b.num !== null && b.num >= 9) {
+                        ctx.save();
+                        ctx.rotate(b.angle * 0.8);
+                        ctx.beginPath();
+                        ctx.fillStyle = '#fff';
+                        ctx.rect(-b.r, -b.r * 0.5, b.r * 2, b.r);
+                        ctx.fill();
+                        ctx.restore();
+                    }
+
+                    // number circle
+                    if (b.num !== null) {
+                        ctx.beginPath();
+                        ctx.fillStyle = '#fff';
+                        ctx.arc(0, 0, b.r * 0.72, 0, Math.PI * 2);
+                        ctx.fill();
+
+                        // text
+                        ctx.fillStyle = b.num <= 8 ? '#000' : '#000';
+                        ctx.font = 'bold 12px Inter, Arial';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText(String(b.num), 0, 0);
+                    } else {
+                        // cue ball subtle shine moving with angle
+                        const shineX = -Math.cos(b.angle || 0) * b.r * 0.35;
+                        const shineY = -Math.sin(b.angle || 0) * b.r * 0.35;
+                        ctx.beginPath();
+                        const grd = ctx.createRadialGradient(shineX - 4, shineY - 6, 1, shineX - 4, shineY - 6, b.r * 0.9);
+                        grd.addColorStop(0, 'rgba(255,255,255,0.95)');
+                        grd.addColorStop(1, 'rgba(255,255,255,0)');
+                        ctx.fillStyle = grd;
+                        ctx.arc(shineX - 4, shineY - 6, 6, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+
+                    // rim
+                    ctx.lineWidth = 1.2;
+                    ctx.strokeStyle = 'rgba(0,0,0,0.25)';
+                    ctx.beginPath();
+                    ctx.arc(0, 0, b.r, 0, Math.PI * 2);
+                    ctx.stroke();
+
+                    ctx.restore();
+                }
+            }
+
+            // physics update step
+            function update(dt) {
+                // integrate positions
+                for (const b of balls) {
+                    if (b.pocketed) {
+                        // sink animation
+                        b.sink = Math.min(1, b.sink + dt * 0.02);
+                        // fade and shrink are handled in draw
+                        continue;
+                    }
+                    b.x += b.vx * dt;
+                    b.y += b.vy * dt;
+
+                    // angular motion: relate angVel to translation for rolling illusion
+                    const translSpeed = hyp(b.vx, b.vy);
+                    // adjust angle by angVel; give angVel proportional to lateral component
+                    b.angVel += ((b.vx * 0.02)) * 0.02;
+                    b.angle += b.angVel * dt;
+                    b.angVel *= 0.995;
+
+                    // wall collisions
+                    const minX = table.x + b.r;
+                    const maxX = table.x + table.w - b.r;
+                    const minY = table.y + b.r;
+                    const maxY = table.y + table.h - b.r;
+
+                    if (b.x < minX) {
+                        b.x = minX;
+                        b.vx = -b.vx * RESTITUTION;
+                        b.vy *= 0.98;
+                        b.angVel *= 0.6;
+                    }
+                    if (b.x > maxX) {
+                        b.x = maxX;
+                        b.vx = -b.vx * RESTITUTION;
+                        b.vy *= 0.98;
+                        b.angVel *= 0.6;
+                    }
+                    if (b.y < minY) {
+                        b.y = minY;
+                        b.vy = -b.vy * RESTITUTION;
+                        b.vx *= 0.98;
+                        b.angVel *= 0.6;
+                    }
+                    if (b.y > maxY) {
+                        b.y = maxY;
+                        b.vy = -b.vy * RESTITUTION;
+                        b.vx *= 0.98;
+                        b.angVel *= 0.6;
+                    }
+
+                    // friction
+                    b.vx *= (1 - friction * dt);
+                    b.vy *= (1 - friction * dt);
+
+                    if (hyp(b.vx, b.vy) < 0.03) {
+                        b.vx = 0;
+                        b.vy = 0;
+                        b.angVel *= 0.9;
+                    }
+                }
+
+                // collisions
+                for (let i = 0; i < balls.length; i++) {
+                    const A = balls[i];
+                    if (A.pocketed) continue;
+                    for (let j = i + 1; j < balls.length; j++) {
+                        const B = balls[j];
+                        if (B.pocketed) continue;
+                        const dx = B.x - A.x,
+                            dy = B.y - A.y;
+                        const d = hyp(dx, dy);
+                        if (d === 0) continue;
+                        const minD = A.r + B.r;
+                        if (d < minD - 0.0001) {
+                            const overlap = minD - d;
+                            const nx = dx / d,
+                                ny = dy / d;
+                            const shift = overlap * 0.5;
+                            A.x -= nx * shift;
+                            A.y -= ny * shift;
+                            B.x += nx * shift;
+                            B.y += ny * shift;
+
+                            // relative velocity along normal
+                            const rvx = B.vx - A.vx,
+                                rvy = B.vy - A.vy;
+                            const rel = rvx * nx + rvy * ny;
+                            if (rel > 0) continue;
+                            const e = RESTITUTION;
+                            const jimp = -(1 + e) * rel / 2; // equal mass
+                            const ix = jimp * nx,
+                                iy = jimp * ny;
+                            A.vx -= ix;
+                            A.vy -= iy;
+                            B.vx += ix;
+                            B.vy += iy;
+
+                            // add angular impulse (simple)
+                            const spin = 0.08;
+                            A.angVel -= rel * spin;
+                            B.angVel += rel * spin;
+                        }
+                    }
+                }
+
+                // pocket detection
+                const pks = pockets();
+                for (const b of balls) {
+                    if (b.pocketed) continue;
+                    for (const pk of pks) {
+                        if (hyp(b.x - pk.x, b.y - pk.y) < POCKET_R - 6) {
+                            // pocketed
+                            b.pocketed = true;
+                            b.vx = 0;
+                            b.vy = 0;
+                            b.sink = 0;
+                            if (b.num !== null) pocketed.push(b.num);
+                            else {
+                                // cue ball respawn after short time (place near side)
+                                setTimeout(() => {
+                                    const cue = balls.find(bb => bb.id === 0);
+                                    if (cue) {
+                                        cue.pocketed = false;
+                                        cue.sink = 0;
+                                        cue.x = table.x + table.w * 0.18;
+                                        cue.y = table.y + table.h / 2;
+                                        cue.vx = 0;
+                                        cue.vy = 0;
+                                    }
+                                    updateUI();
+                                }, 700);
+                            }
+                            updateUI();
+                            break;
+                        }
+                    }
+                }
+            }
+
+            // draw cue stick when aiming
+            const mouse = {
+                x: 0,
+                y: 0,
+                down: false,
+                dragging: false,
+                anchorX: 0,
+                anchorY: 0
+            };
+            let aiming = false;
+
+            function drawCue() {
+                const cue = balls.find(b => b.id === 0);
+                if (!cue || cue.pocketed) return;
+                if (mouse.down && mouse.dragging) {
+                    const dx = mouse.x - cue.x,
+                        dy = mouse.y - cue.y;
+                    const ang = Math.atan2(dy, dx);
+                    const pull = clamp(hyp(dx, dy), 0, 200);
+                    const stickLen = 240 + pull;
+                    ctx.save();
+                    ctx.translate(cue.x, cue.y);
+                    ctx.rotate(ang);
+                    // stick body
+                    const grad = ctx.createLinearGradient(-stickLen, 0, 0, 0);
+                    grad.addColorStop(0, '#462d20');
+                    grad.addColorStop(1, '#bfa26e');
+                    ctx.fillStyle = grad;
+                    ctx.fillRect(-(stickLen), -6, stickLen - (cue.r + 6), 12);
+                    // butt
+                    ctx.fillStyle = '#1c1c1c';
+                    ctx.fillRect(-stickLen - 18, -8, 18, 16);
+                    ctx.restore();
+
+                    if (showTraj) {
+                        ctx.beginPath();
+                        ctx.setLineDash([6, 6]);
+                        ctx.strokeStyle = 'rgba(255,255,255,0.18)';
+                        ctx.moveTo(cue.x, cue.y);
+                        ctx.lineTo(mouse.x, mouse.y);
+                        ctx.stroke();
+                        ctx.setLineDash([]);
+                    }
+                }
+            }
+
+            // draw frame
+            function render() {
+                drawTable();
+                drawBalls();
+                drawCue();
+            }
+
+            // loop
+            let last = performance.now();
+
+            function loop(now) {
+                const dtMS = now - last;
+                last = now;
+                const dt = dtMS / 16.67; // normalized
+                update(dt);
+                render();
+                requestAnimationFrame(loop);
+            }
+
+            // input mapping canvas coords to internal
+            function toCanvas(e) {
+                const r = canvas.getBoundingClientRect();
+                return {
+                    x: (e.clientX - r.left) * (canvas.width / r.width),
+                    y: (e.clientY - r.top) * (canvas.height / r.height)
+                };
+            }
+
+            canvas.addEventListener('mousedown', (e) => {
+                const p = toCanvas(e);
+                mouse.x = p.x;
+                mouse.y = p.y;
+                mouse.down = true;
+                const cue = balls.find(b => b.id === 0);
+                if (!cue || cue.pocketed) return;
+                if (hyp(cue.x - p.x, cue.y - p.y) <= cue.r + 8) {
+                    mouse.dragging = true;
+                    aiming = true;
+                }
+            });
+            window.addEventListener('mousemove', (e) => {
+                const p = toCanvas(e);
+                mouse.x = p.x;
+                mouse.y = p.y;
+            });
+            window.addEventListener('mouseup', (e) => {
+                if (!mouse.dragging) {
+                    mouse.down = false;
+                    aiming = false;
+                    return;
+                }
+                const cue = balls.find(b => b.id === 0);
+                const dx = mouse.x - cue.x,
+                    dy = mouse.y - cue.y;
+                const pull = clamp(hyp(dx, dy), 0, 200);
+                let power = (pull / 120) * powerMult;
+                if (power < 0.02) power = 0;
+                const ang = Math.atan2(dy, dx);
+                const speed = power * 28;
+                cue.vx = Math.cos(ang) * speed;
+                cue.vy = Math.sin(ang) * speed;
+                // small angular kick
+                cue.angVel += (speed * 0.02) * (Math.random() * 0.6 - 0.3);
+                mouse.dragging = false;
+                mouse.down = false;
+                aiming = false;
+            });
+
+            // keyboard / UI
+            window.addEventListener('keydown', (e) => {
+                if (e.code === 'Space') {
+                    e.preventDefault();
+                    rack();
+                }
+                if (e.key === 'r' || e.key === 'R') {
+                    const cue = balls.find(b => b.id === 0);
+                    if (cue) {
+                        cue.x = table.x + table.w * 0.18;
+                        cue.y = table.y + table.h / 2;
+                        cue.vx = 0;
+                        cue.vy = 0;
+                        cue.pocketed = false;
+                        cue.sink = 0;
+                        updateUI();
+                    }
+                }
+            });
+
+            document.getElementById('btnNew').addEventListener('click', () => rack());
+            document.getElementById('btnReset').addEventListener('click', () => {
+                for (const b of balls) {
+                    b.vx = 0;
+                    b.vy = 0;
+                }
+            });
+            document.getElementById('friction').addEventListener('input', (e) => {
+                friction = Number(e.target.value);
+            });
+            document.getElementById('power').addEventListener('input', (e) => {
+                powerMult = Number(e.target.value);
+            });
+            document.getElementById('traj').addEventListener('change', (e) => {
+                showTraj = e.target.checked;
+            });
+
+            // UI update (pocketed/remaining)
+            function updateUI() {
+                const pocketedEl = document.getElementById('pocketed'),
+                    remainingEl = document.getElementById('remaining');
+                pocketedEl.innerHTML = '';
+                remainingEl.innerHTML = '';
+                const rem = [];
+                for (const b of balls) {
+                    if (b.num === null) continue;
+                    if (b.pocketed) {
+                        const chip = document.createElement('div');
+                        chip.className = 'ball-chip';
+                        chip.style.background = b.color;
+                        chip.textContent = b.num;
+                        pocketedEl.appendChild(chip);
+                    } else rem.push(b.num);
+                }
+                rem.sort((a, b) => a - b).forEach(n => {
+                    const obj = balls.find(x => x.num === n);
+                    const chip = document.createElement('div');
+                    chip.className = 'ball-chip';
+                    chip.style.background = obj.color;
+                    chip.textContent = n;
+                    remainingEl.appendChild(chip);
+                });
+            }
+
+            // responsive (preserve internal res)
+            function resize() {
+                const wrap = canvas.parentElement;
+                const cssW = Math.min(wrap.clientWidth, 1200 - 36);
+                canvas.style.width = cssW + 'px';
+                canvas.style.height = (cssW * (canvas.height / canvas.width)) + 'px';
+            }
+            window.addEventListener('resize', resize);
+
+            // init
+            rack();
+            resize();
+            requestAnimationFrame(loop);
+        })();
+    </script>
+</body>
+
+</html>

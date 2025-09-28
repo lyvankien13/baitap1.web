@@ -1,0 +1,7 @@
+D:\BI-A\ClassLibrary1\WebApplication1\bin\WebApplication1.dll.config
+D:\BI-A\ClassLibrary1\WebApplication1\bin\WebApplication1.dll
+D:\BI-A\ClassLibrary1\WebApplication1\bin\WebApplication1.pdb
+D:\BI-A\ClassLibrary1\WebApplication1\obj\Debug\WebApplication1.csproj.AssemblyReference.cache
+D:\BI-A\ClassLibrary1\WebApplication1\obj\Debug\WebApplication1.csproj.CoreCompileInputs.cache
+D:\BI-A\ClassLibrary1\WebApplication1\obj\Debug\WebApplication1.dll
+D:\BI-A\ClassLibrary1\WebApplication1\obj\Debug\WebApplication1.pdb
