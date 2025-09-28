@@ -25,15 +25,16 @@
 **Bước 2:Tạo Solution và 4 Project trong Visual Studio**
 
 - Mở Visual Studio → File → New → Project... → tạo Solution.
-- Trong Solution Explorer → click phải Solution → Add → New Project… → thêm lần lượt:
+- Trong Solution Explorer → click phải Solution → Add → New Project… →
+- thêm lần lượt:
 
-- Class Library (.NET Framework) → tên MagicDLL → Framework 2.0.
+- Class Library (.NET Framework).
 
-- Console Application (.NET Framework) → tên ConsoleApp1 → Framework 2.0.
+- Console Application (.NET Framework).
 
-- Windows Forms Application (.NET Framework) → tên WindowsFormApp1 → Framework 2.0.
+- Windows Forms Application (.NET Framework).
 
-- ASP.NET Web Application (.NET Framework) → tên WebApplication1 → Framework 2.0.<br>
+- ASP.NET Web Application (.NET Framework).<br>
  + <img width="580" height="431" alt="image" src="https://github.com/user-attachments/assets/65418576-ea56-4123-9105-42b7b0b4c675" />
 
  
@@ -56,16 +57,25 @@
   
 - Thêm tham chiếu (Add Reference)
 
-+ Trong ConsoleApp1, WindowsFormApp1, WebApplication1 → Add Reference… → chọn Project → tick MagicDLL.
++ Trong ConsoleApp1, WindowsFormApp1, WebApplication1 → Add Reference… → chọn Project → tích vào Class Library1 → Ok.
++ <img width="1301" height="907" alt="image" src="https://github.com/user-attachments/assets/9efa74aa-e20a-4f03-a90e-1fdf99d4a621" /><img width="971" height="695" alt="image" src="https://github.com/user-attachments/assets/fdd1032d-b717-4efa-8d0f-0e6da235e2f2" />
+
+
 
 == Như vậy 3 project này sẽ dùng được DLL đa năng
   
 **Bước 3:**
-+ web form tạo 1 file api.aspx.cs và index.html
++ web form tạo 1 file api.aspx.cs và index.html<br>
++ <img width="420" height="123" alt="image" src="https://github.com/user-attachments/assets/a1a60f7e-0b15-4ef4-a7fb-6f40e72a37b2" />
+
   
-+ code xử lí api cho api.aspx.cs và code game cho file index.html
++ code xử lí api cho api.aspx.cs và code game cho file index.html<br>
++ <img width="1633" height="579" alt="image" src="https://github.com/user-attachments/assets/7659d7f0-bff3-430d-bfb4-3f7642f84290" />
+<br>
+<img width="1695" height="536" alt="image" src="https://github.com/user-attachments/assets/ce298a3e-c672-412b-be08-5e3cd02ea59a" />
+
   
-+ tạo 1 tệp mới và publish webform vào tệp đó
++ tạo 1 tệp mới và publish webform vào tệp đó<br>
   
 + <img width="1221" height="611" alt="image" src="https://github.com/user-attachments/assets/76589b4c-bf0d-43cc-ab1d-e8731d9ea30d" />
 
@@ -73,13 +83,24 @@
 **Bước 4:**
 + vào iis tạo 1 website mới với tên miền là pool.com và chọn vị trí tệp vừa publish webform vào
   
++ <img width="1296" height="871" alt="image" src="https://github.com/user-attachments/assets/204e51dc-b007-4be1-b063-6f6dab4c0201" />
+
+  
 + vào nodepad chạy quyền admin, mở file hosts theo đường dẫn:C:\Windows\System32\drivers\etc\hosts
   
 + thêm dòng: 127.0.0.1   pool.com vào cuối trang
   
 + lưu lại và lên trình duyệt máy gõ domain pool.com ta được kết quả
 + <img width="826" height="492" alt="image" src="https://github.com/user-attachments/assets/eb06be85-ab63-4075-8ab5-0f1efc37b741" />
-+ <img width="1859" height="962" alt="image" src="https://github.com/user-attachments/assets/f9809d74-8189-4f38-9888-03ca3206c6f7" />
+
+- Kết quả chạy console app:
+ <img width="1551" height="801" alt="image" src="https://github.com/user-attachments/assets/4807137a-50e5-4ed7-9f5e-17a6d89096eb" />
+- Kết quả chạy WebFormsApp:
+  <img width="1536" height="949" alt="image" src="https://github.com/user-attachments/assets/ca5ffa37-a9fd-4cba-a8d1-3608500e8f1b" />
+ - Kết quả chạy Web Application:
+ - <img width="1859" height="962" alt="image" src="https://github.com/user-attachments/assets/e7fd55b6-77ed-4890-81e3-1be7fde284c2" />
+
+
 
 
 
