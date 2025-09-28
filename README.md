@@ -24,8 +24,19 @@
 
 **Bước 2:Tạo Solution và 4 Project trong Visual Studio**
 
-- Mở Visual Studio → File → New → Project... → tạo Solution.<br>
+- Mở Visual Studio → File → New → Project... → tạo Solution.
+- Trong Solution Explorer → click phải Solution → Add → New Project… → thêm lần lượt:
+
+- Class Library (.NET Framework) → tên MagicDLL → Framework 2.0.
+
+- Console Application (.NET Framework) → tên ConsoleApp1 → Framework 2.0.
+
+- Windows Forms Application (.NET Framework) → tên WindowsFormApp1 → Framework 2.0.
+
+- ASP.NET Web Application (.NET Framework) → tên WebApplication1 → Framework 2.0.<br>
  + <img width="580" height="431" alt="image" src="https://github.com/user-attachments/assets/65418576-ea56-4123-9105-42b7b0b4c675" />
+
+ 
 - Trong Solution, tạo 4 project (lần lượt):
 
   + Class Library → Đặt tên ClassLibrary1→chọn tệp BI-A → Target framework: .NET Framework 2.0 → chọn creat.<br>
@@ -42,6 +53,12 @@
 
   + ASP.NET Web Application → Đặt tên WebApplicaton1 → chọn tệp BI-A → Target .NET 2.0 → chọn creat.<br><br>
   <img width="1325" height="823" alt="image" src="https://github.com/user-attachments/assets/17b12435-cb93-4140-a02b-7fa9ce10c2bc" />
+  
+- Thêm tham chiếu (Add Reference)
+
++ Trong ConsoleApp1, WindowsFormApp1, WebApplication1 → Add Reference… → chọn Project → tick MagicDLL.
+
+== Như vậy 3 project này sẽ dùng được DLL đa năng
   
 **Bước 3:**
 + web form tạo 1 file api.aspx.cs và index.html
